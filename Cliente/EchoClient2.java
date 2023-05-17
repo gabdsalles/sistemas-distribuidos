@@ -93,7 +93,7 @@ public class EchoClient2 {
 					token_usuario_conectado = jsonObject.get("token").getAsString();
 				}
 			}
-
+			
 			if (op == 9) {
 
 				JsonObject codigo = JsonParser.parseString(servidor).getAsJsonObject();
