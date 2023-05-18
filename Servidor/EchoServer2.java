@@ -167,18 +167,6 @@ public class EchoServer2 extends Thread {
 						token = (tokenElement != null && !tokenElement.isJsonNull()) ? tokenElement.getAsString() : "";
 						JsonElement id_usuario_Element = jsonObject.get("id_usuario");
 						id_usuario = (id_usuario_Element != null && !id_usuario_Element.isJsonNull()) ? id_usuario_Element.getAsInt() : -1;
-						System.out.println(id_usuario);
-						
-						if (token == "" || id_usuario == Integer.parseInt("")) {
-							logout.addProperty("codigo", 500);
-							logout.addProperty("Mensagem",
-									"Erro no logout: token ou usuário são nulos. Logo, não é possível deslogar o usuário.");
-							String gsonLogout = gson.toJson(logout);
-							out.println(gsonLogout);
-							System.out.println("Enviando para o cliente: " + gsonLogout);
-							System.out.println();
-							break;
-						}
 						
 						if (id_usuario <= listaUsuarios.size() && id_usuario >= 0) { // id usuario valido?
 
@@ -198,7 +186,7 @@ public class EchoServer2 extends Thread {
 
 						} else {
 							logout.addProperty("codigo", 500);
-							logout.addProperty("Mensagem", "Erro no logout: usuário não está cadastrado.");
+							logout.addProperty("Mensagem", "Erro no logout: usuário não está logado.");
 							String gsonLogout = gson.toJson(logout);
 							out.println(gsonLogout);
 							System.out.println("Enviando para o cliente: " + gsonLogout);
@@ -207,14 +195,6 @@ public class EchoServer2 extends Thread {
 						logout.addProperty("codigo", 500);
 						logout.addProperty("Mensagem",
 								"Erro no logout: token ou usuário são nulos. Logo, não é possível deslogar o usuário.");
-						String gsonLogout = gson.toJson(logout);
-						out.println(gsonLogout);
-						System.out.println("Enviando para o cliente: " + gsonLogout);
-						System.out.println();
-						break;
-					} catch (NumberFormatException e1) {
-						logout.addProperty("codigo", 500);
-						logout.addProperty("Mensagem", "Formato inválido");
 						String gsonLogout = gson.toJson(logout);
 						out.println(gsonLogout);
 						System.out.println("Enviando para o cliente: " + gsonLogout);
