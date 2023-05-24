@@ -1,7 +1,10 @@
 package Cliente;
 
+import Interface.TelaConexao;
 import java.io.*;
 import java.net.*;
+
+import javax.swing.SwingUtilities;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,6 +20,8 @@ public class EchoClient2 {
 		int numeroPorta = Integer.parseInt(stdIn.readLine());
 		
 		Usuario usuario1 = new Usuario();
+		
+		
 
 		if (args.length > 0)
 			serverHostname = args[0];

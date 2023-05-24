@@ -22,40 +22,33 @@ public class Usuario {
 
 	Usuario() {}
     
-    public String login(BufferedReader stdIn) throws IOException {
+    public String login(String email, String senha) {
     	
     	Gson gson = new Gson();
     	JsonObject jsonObject = new JsonObject();
     	jsonObject.addProperty("id_operacao", 3);
-    	System.out.println("=========Realizar Login=========");
-    	System.out.println("Insira seu e-mail:");
-    	jsonObject.addProperty("email", stdIn.readLine());
-        System.out.println("Insira sua senha:");
-        jsonObject.addProperty("senha", hashed(stdIn.readLine()));
+    	jsonObject.addProperty("email", email);
+        jsonObject.addProperty("senha", hashed(senha));
         String gsonString = gson.toJson(jsonObject);
         return gsonString;
     	
     }
     
-    public String cadastro(BufferedReader stdIn) throws IOException {
+    public String cadastro(String nome, String email, String senha) {
     	
     	Gson gson = new Gson();
     	JsonObject jsonObject = new JsonObject();
     	jsonObject.addProperty("id_operacao", 1);
-    	System.out.println("=========Realizar Cadastro=========");
-    	System.out.println("Insira seu nome:");
-    	jsonObject.addProperty("nome", stdIn.readLine());
-    	System.out.println("Insira seu e-mail:");
-    	jsonObject.addProperty("email", stdIn.readLine());
-    	System.out.println("Insira sua senha:");
-    	jsonObject.addProperty("senha", hashed(stdIn.readLine()));
+    	jsonObject.addProperty("nome", nome);
+    	jsonObject.addProperty("email", email);
+    	jsonObject.addProperty("senha", hashed(senha));
     	String gsonString = gson.toJson(jsonObject);
     	return gsonString;
     	
     }
     
     
-    public String logout(BufferedReader stdIn, int id_usuario, String token) throws IOException {
+    public String logout(int id_usuario, String token) {
     	
     	Gson gson = new Gson();
     	JsonObject jsonObject = new JsonObject();
