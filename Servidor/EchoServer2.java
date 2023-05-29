@@ -5,7 +5,7 @@ import java.io.*;
 import com.google.gson.*;
 import java.util.ArrayList;
 
-import Cliente.Usuario;
+import Controle.*;
 
 public class EchoServer2 extends Thread {
 
@@ -13,6 +13,7 @@ public class EchoServer2 extends Thread {
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket serverSocket = null;
+		
 
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 
@@ -53,11 +54,12 @@ public class EchoServer2 extends Thread {
 		System.out.println("New Communication Thread Started");
 
 		Gson gson = new Gson();
-		ArrayList<Usuario> listaUsuarios = new ArrayList<Usuario>();
-		Usuario user1 = new Usuario("Gabriel", "teste@testando.com", "|nwqj:;<="); // senha1234
-		user1.setId_usuario(0);
-		listaUsuarios.add(user1);
+		GsonControlServer gsonControl = new GsonControlServer();
 		int contUsuarios = 1;
+		
+		String token_conectado = "";
+		int id_conectado = -1;
+		int codigo = 0;
 
 		try {
 			PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -68,7 +70,6 @@ public class EchoServer2 extends Thread {
 			while (true) {
 				inputLine = in.readLine();
 				System.out.println("Vindo do cliente: " + inputLine);
-				int codigo = 0;
 				int id_usuario = -1;
 				String token = "";
 
@@ -81,128 +82,64 @@ public class EchoServer2 extends Thread {
 				switch (id_operacao) {
 
 				case 1: // cadastro
-					String nome = jsonObject.get("nome").getAsString();
-					String email = jsonObject.get("email").getAsString();
-					String senha = jsonObject.get("senha").getAsString();
-					Usuario usuario1 = new Usuario(nome, email, senha);
-					JsonObject cadastro = new JsonObject();
-					boolean verification = false;
 
-					for (Usuario usuario : listaUsuarios) {
-						if (usuario.getEmail() == email) {
-							verification = true;
-						}
-					}
-
-					if (verification) { // já tem um cadastro na lista
-						codigo = 500;
-						cadastro.addProperty("codigo", codigo);
-						cadastro.addProperty("mensagem", "Este email ja esta cadastrado!");
-						gsonString = gson.toJson(cadastro);
-						out.println(gsonString);
-					} else {
-						if (usuario1.verificarCadastro(usuario1)) {
-
-							codigo = 200;
-							cadastro.addProperty("codigo", codigo);
-							gsonString = gson.toJson(cadastro);
-							out.println(gsonString);
-							usuario1.setId_usuario(contUsuarios);
-							listaUsuarios.add(usuario1);
-							contUsuarios++;
-						} else {
-							codigo = 500;
-							cadastro.addProperty("codigo", codigo);
-							cadastro.addProperty("mensagem", "Cadastro invalido!");
-							gsonString = gson.toJson(cadastro);
-							out.println(gsonString);
-						}
-					}
-
+					gsonString = gsonControl.cadastro(jsonObject, contUsuarios);
+					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
 
+				case 2: //atualizar cadastro
+					gsonString = gsonControl.atualizarCadastro(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+				
 				case 3: // login
-					String email2 = jsonObject.get("email").getAsString();
-					String senha2 = jsonObject.get("senha").getAsString();
-					boolean verificacao = false;
-
-					for (Usuario usuario11 : listaUsuarios) {
-
-						if (usuario11.getEmail().equals(email2) && usuario11.getSenha().equals(senha2)) {
-							token = usuario11.gerarToken();
-							usuario11.setToken(token);
-							id_usuario = usuario11.getId_usuario();
-							verificacao = true;
-						}
-
+					gsonString = gsonControl.login(jsonObject);
+					JsonObject checkLogin = JsonParser.parseString(gsonString).getAsJsonObject();
+					codigo = checkLogin.get("codigo").getAsInt();
+					
+					if (codigo == 200) {
+						
+						token_conectado = checkLogin.get("token").getAsString();
+						id_conectado = checkLogin.get("id_usuario").getAsInt();
 					}
+					
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
 
-					String gsonString2 = "";
-					JsonObject login = new JsonObject();
+				case 4: //reportar incidente
+					gsonString = gsonControl.reportarIncidente(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
 
-					if (verificacao) {
-						login.addProperty("codigo", 200);
-						login.addProperty("token", listaUsuarios.get(id_usuario).getToken());
-						login.addProperty("id_usuario", id_usuario);
-						gsonString2 = gson.toJson(login);
-						out.println(gsonString2);
-					} else {
-
-						codigo = 500;
-						login.addProperty("codigo", codigo);
-						login.addProperty("mensagem", "Erro: e-mail ou senha invalidos!");
-						gsonString2 = gson.toJson(login);
-						out.println(gsonString2);
-					}
-
-					System.out.println("Enviando para o cliente: " + gsonString2);
+					break;
+					
+				case 5: //solicitar lista de incidentes
+					gsonString = gsonControl.solicitarListaIncidentes(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
 
 				case 9: // logout
-
-					JsonObject logout = new JsonObject();
-					try {
-						JsonElement tokenElement = jsonObject.get("token");
-						token = (tokenElement != null && !tokenElement.isJsonNull()) ? tokenElement.getAsString() : "";
-						JsonElement id_usuario_Element = jsonObject.get("id_usuario");
-						id_usuario = (id_usuario_Element != null && !id_usuario_Element.isJsonNull()) ? id_usuario_Element.getAsInt() : -1;
+					gsonString = gsonControl.logout(jsonObject);
+					
+					JsonObject checkLogout = JsonParser.parseString(gsonString).getAsJsonObject();
+					codigo = checkLogout.get("codigo").getAsInt();
+					
+					if (codigo == 200) {
 						
-						if (id_usuario <= listaUsuarios.size() && id_usuario >= 0) { // id usuario valido?
-
-							if (listaUsuarios.get(id_usuario).getToken().equals(token)) { // token valido
-								listaUsuarios.get(id_usuario).setToken(null);
-								logout.addProperty("codigo", 200);
-								String gsonLogout = gson.toJson(logout);
-								out.println(gsonLogout);
-								System.out.println("Enviando para o cliente: " + gsonLogout);
-							} else {
-								logout.addProperty("codigo", 500);
-								logout.addProperty("Mensagem", "Erro no logout: usuário não está logado.");
-								String gsonLogout = gson.toJson(logout);
-								out.println(gsonLogout);
-								System.out.println("Enviando para o cliente: " + gsonLogout);
-							}
-
-						} else {
-							logout.addProperty("codigo", 500);
-							logout.addProperty("Mensagem", "Erro no logout: usuário não está logado.");
-							String gsonLogout = gson.toJson(logout);
-							out.println(gsonLogout);
-							System.out.println("Enviando para o cliente: " + gsonLogout);
-						}
-					} catch (NullPointerException e) {
-						logout.addProperty("codigo", 500);
-						logout.addProperty("Mensagem",
-								"Erro no logout: token ou usuário são nulos. Logo, não é possível deslogar o usuário.");
-						String gsonLogout = gson.toJson(logout);
-						out.println(gsonLogout);
-						System.out.println("Enviando para o cliente: " + gsonLogout);
-						System.out.println();
-						break;
+						token_conectado = "";
+						id_conectado = -1;
 					}
+					
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
 				}
 			}
+
 			out.close();
 			in.close();
 			clientSocket.close();
