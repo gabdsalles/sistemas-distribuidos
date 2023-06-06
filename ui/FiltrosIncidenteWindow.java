@@ -58,7 +58,7 @@ public class FiltrosIncidenteWindow extends JFrame {
 		periodoBox = new JComboBox<String>();
 		labelRodovia = new JLabel("Rodovia");
 		labelKm = new JLabel("Faixa KM");
-		labelData = new JLabel("Data (DD-MM-YYYY");
+		labelData = new JLabel("Data (DD-MM-YYYY)");
 		labelPeriodo = new JLabel("Período");
 		confirmar = new JButton("Confirmar");
 		voltar = new JButton("Voltar");

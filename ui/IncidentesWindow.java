@@ -1,9 +1,7 @@
 package ui;
 
-import Controle.Incidente;
 import Controle.IncidenteSemId;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.List;
@@ -65,13 +63,13 @@ public class IncidentesWindow extends JFrame {
     }
 
 
-//    public static void main(String[] args) {
-//    	
-//    	List<IncidenteSemId> listaIncidentes = new ArrayList<IncidenteSemId>();
-//    	IncidenteSemId incidente1 = new IncidenteSemId("2023-05-26 14:50:31", "BR-277", 41, 7, 1);
-//    	listaIncidentes.add(incidente1);
-//        SwingUtilities.invokeLater(() -> {
-//            new IncidentesWindow(listaIncidentes);
-//        });
-//    }
+    public static void main(String[] args) {
+    	
+    	List<IncidenteSemId> listaIncidentes = new ArrayList<IncidenteSemId>();
+    	IncidenteSemId incidente1 = new IncidenteSemId("2023-05-26 14:50:31", "BR-277", 41, 7, 1);
+    	listaIncidentes.add(incidente1);
+        SwingUtilities.invokeLater(() -> {
+            new IncidentesWindow(listaIncidentes);
+        });
+    }
 }

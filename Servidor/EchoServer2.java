@@ -1,11 +1,13 @@
 package Servidor;
 
 import java.net.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.io.*;
 import com.google.gson.*;
-import java.util.ArrayList;
 
 import Controle.*;
+import dao.BancoDeDados;
 
 public class EchoServer2 extends Thread {
 
@@ -54,11 +56,9 @@ public class EchoServer2 extends Thread {
 		System.out.println("New Communication Thread Started");
 
 		Gson gson = new Gson();
+		Connection conexao;
 		GsonControlServer gsonControl = new GsonControlServer();
-		int contUsuarios = 1;
-		
-		String token_conectado = "";
-		int id_conectado = -1;
+		int contUsuarios = 2;
 		int codigo = 0;
 
 		try {
@@ -66,12 +66,11 @@ public class EchoServer2 extends Thread {
 			BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 			String inputLine;
+			conexao = BancoDeDados.conectar();
 
 			while (true) {
 				inputLine = in.readLine();
 				System.out.println("Vindo do cliente: " + inputLine);
-				int id_usuario = -1;
-				String token = "";
 
 				JsonObject jsonObject = JsonParser.parseString(inputLine).getAsJsonObject();
 				int id_operacao = jsonObject.get("id_operacao").getAsInt();
@@ -83,34 +82,25 @@ public class EchoServer2 extends Thread {
 
 				case 1: // cadastro
 
-					gsonString = gsonControl.cadastro(jsonObject, contUsuarios);
+					gsonString = gsonControl.cadastro(jsonObject, contUsuarios, conexao);
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
 
 				case 2: //atualizar cadastro
-					gsonString = gsonControl.atualizarCadastro(jsonObject);
+					gsonString = gsonControl.atualizarCadastro(jsonObject,conexao);
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
 				
 				case 3: // login
-					gsonString = gsonControl.login(jsonObject);
-					JsonObject checkLogin = JsonParser.parseString(gsonString).getAsJsonObject();
-					codigo = checkLogin.get("codigo").getAsInt();
-					
-					if (codigo == 200) {
-						
-						token_conectado = checkLogin.get("token").getAsString();
-						id_conectado = checkLogin.get("id_usuario").getAsInt();
-					}
-					
+					gsonString = gsonControl.login(jsonObject, conexao);		
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
 
 				case 4: //reportar incidente
-					gsonString = gsonControl.reportarIncidente(jsonObject);
+					gsonString = gsonControl.reportarIncidente(jsonObject, conexao);
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 
@@ -121,32 +111,52 @@ public class EchoServer2 extends Thread {
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
 					break;
-
-				case 9: // logout
-					gsonString = gsonControl.logout(jsonObject);
 					
-					JsonObject checkLogout = JsonParser.parseString(gsonString).getAsJsonObject();
-					codigo = checkLogout.get("codigo").getAsInt();
-					
-					if (codigo == 200) {
-						
-						token_conectado = "";
-						id_conectado = -1;
-					}
-					
+				case 6: //solicitar lista de incidentes do usuário
+					gsonString = gsonControl.solicitarMeusIncidentes(jsonObject);
 					out.println(gsonString);
 					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+					
+				case 7: //excluir um incidente
+					gsonString = gsonControl.excluirIncidente(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+					
+				case 8: //excluir um cadastro
+					gsonString = gsonControl.removerCadastro(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+
+				case 9: // logout
+					gsonString = gsonControl.logout(jsonObject, conexao);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+					
+				case 10: //editar incidente
+					gsonString = gsonControl.editarIncidente(jsonObject);
+					out.println(gsonString);
+					System.out.println("Enviando para o cliente: " + gsonString);
+					break;
+					
+				default:
 					break;
 				}
 			}
 
 			out.close();
 			in.close();
+			BancoDeDados.desconectar();
 			clientSocket.close();
 		}
 
 		catch (IOException e) {
 			System.err.println("Problem with Communication Server");
+		} catch (SQLException e) {
+			System.out.println("Erro no SQL: " + e.getMessage());
 		}
 	}
 }

@@ -1,22 +1,26 @@
 package Cliente;
 
-import Controle.*;
-import ui.*;
-
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Type;
+import java.net.Socket;
 import java.util.List;
 
 import javax.swing.JOptionPane;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+
+import Controle.GsonControlClient;
+import Controle.IncidenteSemId;
+import Controle.Usuario;
+import ui.*;
 
 public class EchoClientInterface {
 
@@ -33,6 +37,8 @@ public class EchoClientInterface {
 	static RepIncWindow incidentePage = new RepIncWindow();
 	static AtualizarCadastroWindow atualizarPage = new AtualizarCadastroWindow();
 	static FiltrosIncidenteWindow filtrosPage = new FiltrosIncidenteWindow();
+	static EditarIncidenteWindow editarPage = new EditarIncidenteWindow();
+	static RemoverCadastroWindow removerPage = new RemoverCadastroWindow();
 	static Usuario usuario1 = new Usuario();
 	static int id_usuario_conectado = -1;
 	static String token_usuario_conectado = null;
@@ -162,14 +168,13 @@ public class EchoClientInterface {
 				int codigo = jsonObject.get("codigo").getAsInt();
 
 				if (codigo == 200) {
-					// JOptionPane.showMessageDialog(cadastroWindow, "Cadastro realizado com
-					// sucesso!");
+					JOptionPane.showMessageDialog(cadastroWindow, "Cadastro realizado com sucesso!");
 					cadastroWindow.setVisible(false);
 					abrirTelaInicial();
 
 				} else if (codigo == 500) {
 					String mensagem = jsonObject.get("mensagem").getAsString();
-					// JOptionPane.showMessageDialog(cadastroWindow, mensagem);
+					JOptionPane.showMessageDialog(cadastroWindow, mensagem);
 					cadastroWindow.setVisible(false);
 					abrirTelaInicial();
 				}
@@ -205,9 +210,20 @@ public class EchoClientInterface {
 			abrirListaIncidentes();
 		};
 		
+		ActionListener meusIncidentesAL = e -> {
+			homePage.setVisible(false);
+			abrirMeusIncidentes();
+		};
+		
 		ActionListener atualizarCadastroAL = e -> {
 			homePage.setVisible(false);
 			abrirAtualizarCadastro();
+		};
+		
+		ActionListener removerCadastroAL = e -> {
+			
+			homePage.setVisible(false);
+			abrirRemoverCadastro();
 		};
 		
 		ActionListener logoutAL = e -> {
@@ -239,14 +255,45 @@ public class EchoClientInterface {
 		
 		homePage.getReportarIncidentes().removeActionListener(reportarIncidentesAL);
 		homePage.getSolicitarLista().removeActionListener(solicitarListaAL);
+		homePage.getMeusIncidentes().removeActionListener(meusIncidentesAL);
 		homePage.getAtualizarCadastro().removeActionListener(atualizarCadastroAL);
+		homePage.getRemoverCadastro().removeActionListener(removerCadastroAL);
 		homePage.getLogout().removeActionListener(logoutAL);
 
 		homePage.getReportarIncidentes().addActionListener(reportarIncidentesAL);
 		homePage.getSolicitarLista().addActionListener(solicitarListaAL);
+		homePage.getMeusIncidentes().addActionListener(meusIncidentesAL);
 		homePage.getAtualizarCadastro().addActionListener(atualizarCadastroAL);
+		homePage.getRemoverCadastro().addActionListener(removerCadastroAL);
 		homePage.getLogout().addActionListener(logoutAL);
 
+	}
+	
+	private static void abrirMeusIncidentes() {
+		String gsonString = gsonControlClient.solicitarMeusIncidentes(token_usuario_conectado, id_usuario_conectado);
+		System.out.println("Enviando para o servidor: " + gsonString);
+		out.println(gsonString);
+		
+		String servidor;
+		try {
+			servidor = in.readLine();
+			Gson gson = new Gson();
+			System.out.println("Vindo do servidor: " + servidor);
+			JsonObject jsonObject = gson.fromJson(servidor, JsonObject.class);
+			int codigo = jsonObject.get("codigo").getAsInt();
+
+			if (codigo == 200) {
+				JsonArray listaIncidentesJson = jsonObject.getAsJsonArray("lista_incidentes");
+
+				Type incidenteListType = new TypeToken<List<IncidenteSemId>>() {}.getType();
+				List<IncidenteSemId> listaIncidentes = gson.fromJson(listaIncidentesJson, incidenteListType);
+				MeusIncidentesWindow meusWindow = new MeusIncidentesWindow(listaIncidentes);
+				abrirMeusIncidentesWindow(meusWindow);
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 	}
 
 	private static void abrirReportarIncidentes() {
@@ -323,13 +370,13 @@ public class EchoClientInterface {
 				if (codigo == 200) {
 					// JOptionPane.showMessageDialog(cadastroWindow, "Cadastro realizado com
 					// sucesso!");
-					cadastroWindow.setVisible(false);
+					atualizarPage.setVisible(false);
 					abrirTelaInicial();
 
 				} else if (codigo == 500) {
 					String mensagem = jsonObject.get("mensagem").getAsString();
 					// JOptionPane.showMessageDialog(cadastroWindow, mensagem);
-					cadastroWindow.setVisible(false);
+					atualizarPage.setVisible(false);
 					abrirTelaInicial();
 				}
 			} catch (IOException e1) {
@@ -397,8 +444,8 @@ public class EchoClientInterface {
 		filtrosPage.getConfirmar().addActionListener(confirmarAL);
 		filtrosPage.getVoltar().addActionListener(voltarAL);
 	}
-
-	public static void abrirIncidentesWindow(IncidentesWindow incidenteWindow) {
+	
+	private static void abrirIncidentesWindow(IncidentesWindow incidenteWindow) {
 
 		ActionListener voltarAL = e -> {
 			incidenteWindow.setVisible(false);
@@ -409,4 +456,162 @@ public class EchoClientInterface {
 		
 		incidenteWindow.getVoltar().addActionListener(voltarAL);
 	}
+
+	private static void abrirMeusIncidentesWindow(MeusIncidentesWindow meusWindow) {
+
+	    ActionListener voltarAL = e -> {
+	        meusWindow.setVisible(false);
+	        abrirHomePage();
+	    };
+	    
+	    ActionListener excluirAL = e -> {
+			int resposta = JOptionPane.showOptionDialog(null, "Deseja excluir este incidente?", "Confirmação", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			
+			int selectedRow = meusWindow.getIncidentesTable().getSelectedRow();
+			if (selectedRow != -1) {
+				int id_incidente = (int) meusWindow.getIncidentesTable().getValueAt(selectedRow, 0);
+				if (resposta == JOptionPane.YES_OPTION) {
+	                //System.out.println("Excluindo o item...");
+					String gsonString = gsonControlClient.excluirIncidente(token_usuario_conectado, id_incidente, id_usuario_conectado);
+					out.println(gsonString);
+					System.out.println("Enviando para o servidor: " + gsonString);
+					String servidor = "";
+						try {
+							servidor = in.readLine();
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						Gson gson = new Gson();
+						System.out.println("Vindo do servidor: " + servidor);
+						JsonObject jsonObject = gson.fromJson(servidor, JsonObject.class);
+						int codigo = jsonObject.get("codigo").getAsInt();
+
+						if (codigo == 200) {
+							meusWindow.setVisible(false);
+							abrirHomePage();
+					}
+	            }
+			    
+			}
+		};
+		
+		ActionListener editarAL = e -> {
+			
+			meusWindow.setVisible(false);
+			int selectedRow = meusWindow.getIncidentesTable().getSelectedRow();
+			int id_incidente = (int) meusWindow.getIncidentesTable().getValueAt(selectedRow, 0);
+			
+			
+			abrirEditarIncidente(id_incidente);
+		};
+	    
+
+	    meusWindow.getVoltar().removeActionListener(voltarAL);
+	    meusWindow.getExcluir().removeActionListener(excluirAL);
+	    meusWindow.getEditar().removeActionListener(editarAL);
+
+	    meusWindow.getVoltar().addActionListener(voltarAL);
+	    meusWindow.getExcluir().addActionListener(excluirAL);
+	    meusWindow.getEditar().addActionListener(editarAL);
+	    
+
+	}
+	
+	private static void abrirEditarIncidente(int id_incidente) {
+		
+		editarPage.setVisible(true);
+		
+		ActionListener voltarAL = e -> {
+	        editarPage.setVisible(false);
+	        abrirHomePage();
+	    };
+	    
+	    ActionListener confirmarAL = e -> {
+	    	String rodovia = editarPage.getRodovia();
+			int km = editarPage.getKm();
+			String data = editarPage.getData();
+			String hora = editarPage.getHora();
+			int tipo_incidente = editarPage.getTipoIncidente();
+
+			String gsonString = gsonControlClient.editarIncidente(token_usuario_conectado, rodovia, data, hora, km, id_incidente, id_usuario_conectado, tipo_incidente);
+			System.out.println("Enviando para o servidor: " + gsonString);
+			out.println(gsonString);
+
+			String servidor;
+			try {
+				servidor = in.readLine();
+				Gson gson = new Gson();
+				System.out.println("Vindo do servidor: " + servidor);
+				JsonObject jsonObject = gson.fromJson(servidor, JsonObject.class);
+				int codigo = jsonObject.get("codigo").getAsInt();
+
+				if (codigo == 200) {
+					
+					editarPage.setVisible(false);
+					abrirHomePage();
+					
+				}
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+	    };
+	    
+	    editarPage.getVoltar().removeActionListener(voltarAL);
+	    editarPage.getConfirmar().removeActionListener(confirmarAL);
+
+	    editarPage.getVoltar().addActionListener(voltarAL);
+	    editarPage.getConfirmar().addActionListener(confirmarAL);
+		
+	}
+	
+	private static void abrirRemoverCadastro() {
+		
+		removerPage.setVisible(true);
+		
+		ActionListener voltarAL = e -> {
+			removerPage.setVisible(false);
+			abrirHomePage();
+		};
+		
+		ActionListener confirmarAL = e -> {
+			
+			int resposta = JOptionPane.showOptionDialog(null, "Deseja mesmo excluir este usuário?", "Confirmação", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			
+			if (resposta == JOptionPane.YES_OPTION) {
+				String email = removerPage.getEmail();
+				String senha = removerPage.getSenha();
+				String gsonString = gsonControlClient.removerCadastro(email, senha, token_usuario_conectado, id_usuario_conectado);
+				System.out.println("Enviando para o servidor: " + gsonString);
+
+				out.println(gsonString);
+				
+				String servidor = "";
+				try {
+					servidor = in.readLine();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+				Gson gson = new Gson();
+				System.out.println("Vindo do servidor: " + servidor);
+				JsonObject jsonObject = gson.fromJson(servidor, JsonObject.class);
+				int codigo = jsonObject.get("codigo").getAsInt();
+
+				if (codigo == 200) {
+					removerPage.setVisible(false);
+					abrirTelaInicial();
+			}
+				
+				
+			}
+			
+		};
+		
+		removerPage.getConfirmar().removeActionListener(confirmarAL);
+		removerPage.getVoltar().removeActionListener(voltarAL);
+
+		removerPage.getConfirmar().addActionListener(confirmarAL);
+		removerPage.getVoltar().addActionListener(voltarAL);
+	}
+
+
 }

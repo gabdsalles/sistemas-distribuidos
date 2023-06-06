@@ -13,7 +13,9 @@ public class HomePage extends JFrame {
 	
 	private JButton reportarIncidentes;
 	private JButton solicitarLista;
+	private JButton meusIncidentes;
 	private JButton atualizarCadastro;
+	private JButton removerCadastro;
 	private JButton logout;
 	
 	
@@ -36,7 +38,9 @@ public class HomePage extends JFrame {
         
         reportarIncidentes = new JButton("Reportar Incidentes");
         solicitarLista = new JButton("Solicitar Lista de Incidentes");
+        meusIncidentes = new JButton("Meus Incidentes");
         atualizarCadastro = new JButton ("Atualizar Cadastro");
+        removerCadastro = new JButton ("Remover Cadastro");
         logout = new JButton ("Logout");
         
         gbc.gridx = 0;
@@ -48,9 +52,15 @@ public class HomePage extends JFrame {
 		panel.add(solicitarLista, gbc);
 		
 		gbc.gridy = 2;
-		panel.add(atualizarCadastro, gbc);
+		panel.add(meusIncidentes, gbc);
 		
 		gbc.gridy = 3;
+		panel.add(atualizarCadastro, gbc);
+		
+		gbc.gridy = 4;
+		panel.add(removerCadastro, gbc);
+		
+		gbc.gridy = 5;
 		panel.add(logout, gbc);
 		
 		add(panel, BorderLayout.CENTER);
@@ -75,6 +85,15 @@ public class HomePage extends JFrame {
 	
 	public JButton getSolicitarLista() {
 		return solicitarLista;
+	}
+	
+	public JButton getMeusIncidentes() {
+		return meusIncidentes;
+	}
+
+
+	public JButton getRemoverCadastro() {
+		return removerCadastro;
 	}
 
 }

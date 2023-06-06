@@ -31,7 +31,7 @@ public class IncidenteSemId {
 	public int getTipo_incidente() {
 		return tipo_incidente;
 	}
-
+	
 	public int getId_incidente() {
 		return id_incidente;
 	}

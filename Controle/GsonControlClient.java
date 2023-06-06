@@ -62,7 +62,6 @@ public class GsonControlClient {
 		return gsonString;
 	}
 	
-
 	public String reportarIncidente(String rodovia, int km, int tipo_incidente, String token, int id_usuario) {
 		
 		JsonObject jsonObject = new JsonObject();
@@ -90,6 +89,7 @@ public class GsonControlClient {
 		jsonObject.addProperty("rodovia", rodovia);
 		
 		if (data.matches("^\\d{2}-\\d{2}-\\d{4}$")) data = arrumarData(data);
+		data = data + " 00:00:00";
 		jsonObject.addProperty("data", data);
 		jsonObject.addProperty("faixa_km", faixa_Km);
 		jsonObject.addProperty("periodo", periodo);
@@ -97,6 +97,66 @@ public class GsonControlClient {
 		String gsonString = gson.toJson(jsonObject);
 		
 		return gsonString;
+	}
+	
+	public String solicitarMeusIncidentes(String token, int id_usuario) {
+		
+		jsonObject = new JsonObject();
+		
+		jsonObject.addProperty("id_operacao", 6);
+		jsonObject.addProperty("token", token);
+		jsonObject.addProperty("id_usuario", id_usuario);
+		
+		String gsonString = gson.toJson(jsonObject);
+		
+		return gsonString;
+		
+	}
+	
+	public String editarIncidente(String token, String rodovia, String data, String hora, int km, int id_incidente, int id_usuario, int tipo_incidente) {
+		
+		jsonObject = new JsonObject();
+		
+		jsonObject.addProperty("id_operacao", 10);
+		jsonObject.addProperty("token", token);
+		jsonObject.addProperty("id_incidente", id_incidente);
+		jsonObject.addProperty("id_usuario", id_usuario);
+		if (data.matches("^\\d{2}-\\d{2}-\\d{4}$")) data = arrumarData(data);
+		data = data + " " + hora;
+		jsonObject.addProperty("data", data);
+		jsonObject.addProperty("rodovia", rodovia);
+		jsonObject.addProperty("km", km);
+		jsonObject.addProperty("tipo_incidente", tipo_incidente);
+		
+		String gsonString = gson.toJson(jsonObject);
+		return gsonString;
+		
+	}
+	
+	public String excluirIncidente(String token, int id_incidente, int id_usuario) {
+		
+		jsonObject = new JsonObject();
+		
+		jsonObject.addProperty("id_operacao", 7);
+		jsonObject.addProperty("token", token);
+		jsonObject.addProperty("id_incidente", id_incidente);
+		jsonObject.addProperty("id_usuario", id_usuario);
+		
+		String gsonString = gson.toJson(jsonObject);
+		return gsonString;
+	}
+	
+	public String removerCadastro(String email, String senha, String token, int id_usuario) {
+		
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("id_operacao", 8);
+		jsonObject.addProperty("email", email);
+		jsonObject.addProperty("senha", hashed(senha));
+		jsonObject.addProperty("token", token);
+		jsonObject.addProperty("id_usuario", id_usuario);
+		String gsonString = gson.toJson(jsonObject);
+		return gsonString;
+		
 	}
 	
 	public String arrumarData(String data) {
