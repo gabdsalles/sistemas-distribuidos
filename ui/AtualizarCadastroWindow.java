@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import Controle.Usuario;
+import entities.Usuario;
 
 public class AtualizarCadastroWindow extends JFrame {
 	

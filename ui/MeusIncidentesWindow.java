@@ -1,7 +1,5 @@
 package ui;
 
-import Controle.IncidenteSemId;
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.util.List;
@@ -9,6 +7,8 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+
+import entities.IncidenteSemId;
 
 public class MeusIncidentesWindow extends JFrame {
 

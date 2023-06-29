@@ -10,7 +10,7 @@ import java.text.ParseException;
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 
-import Controle.TipoIncidente;
+import entities.TipoIncidente;
 
 public class EditarIncidenteWindow extends JFrame {
 

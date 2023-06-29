@@ -1,6 +1,5 @@
 package ui;
 
-import Controle.IncidenteSemId;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Font;
@@ -8,6 +7,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 import javax.swing.*;
+
+import entities.IncidenteSemId;
 
 public class IncidentesWindow extends JFrame {
 	

@@ -11,7 +11,8 @@ import java.text.ParseException;
 import javax.swing.*;
 import javax.swing.text.*;
 
-import Controle.*;
+import controle.*;
+import entities.TipoIncidente;
 
 public class RepIncWindow extends JFrame {
 

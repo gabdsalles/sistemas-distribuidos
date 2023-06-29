@@ -7,11 +7,12 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.text.ParseException;
-import Controle.Periodo;
-import Controle.TipoIncidente;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
+
+import entities.Periodo;
+import entities.TipoIncidente;
 
 public class FiltrosIncidenteWindow extends JFrame {
 
